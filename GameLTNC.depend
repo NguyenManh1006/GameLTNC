@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1759158019 source:d:\codeblock\gameltnc\main.cpp
+	<SDL.h>
+	<iostream>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<algorithm>
+
