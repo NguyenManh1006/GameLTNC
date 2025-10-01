@@ -13,7 +13,7 @@ void Car::MoveDown(int speed) {
     rect.y += speed;
 }
 
-void Car::GetRect() const {
+SDL_Rect Car::GetRect() const {
     return rect;
 }
 
