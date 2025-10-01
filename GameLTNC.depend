@@ -1,9 +1,22 @@
 # depslib dependency file v1.0
-1759158019 source:d:\codeblock\gameltnc\main.cpp
+1759161809 source:d:\codeblock\gameltnc\main.cpp
+
+1759334965 source:d:\codeblock\gameltnc\car.cpp
+	"Car.h"
+
+1759334960 d:\codeblock\gameltnc\car.h
+	"CommonFunction.h"
+
+1759334846 d:\codeblock\gameltnc\commonfunction.h
+	<windows.h>
 	<SDL.h>
+	<SDL_image.h>
+	<string>
 	<iostream>
 	<vector>
-	<cstdlib>
-	<ctime>
+	<SDL_mixer.h>
+	<SDL_ttf.h>
+	<fstream>
 	<algorithm>
+	<ctime>
 

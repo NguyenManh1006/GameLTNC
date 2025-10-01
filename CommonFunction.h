@@ -42,6 +42,18 @@ namespace SDLCommonFunction {
     inline bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b) {
         return SDL_HasIntersection(&a, &b);
     }
+}
+
+inline SDL_Texture* LoadTexture(const std::string& path, SDL_Renderer* renderer) {
+    SDL_Surface* surface = IMG_Load(path.c_str());
+    if (!surface) {
+        std::cout << "Failed to load image: " << IMG_GetError() << "\n";
+        return nullptr;
+    }
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    return texture;
+}
 
 
 #endif // COMMONFUNCTION_H_INCLUDED
