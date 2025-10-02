@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1759399118 source:d:\codeblock\gameltnc\main.cpp
+1759402856 source:d:\codeblock\gameltnc\main.cpp
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
@@ -41,11 +41,11 @@
 1759389497 d:\codeblock\gameltnc\enemy.h
 	"car.h"
 
-1759399118 source:d:\codeblock\gameltnc\gamemap.cpp
+1759402759 source:d:\codeblock\gameltnc\gamemap.cpp
 	"GameMap.h"
 	<cstdlib>
 
-1759389836 d:\codeblock\gameltnc\gamemap.h
+1759402715 d:\codeblock\gameltnc\gamemap.h
 	<SDL.h>
 	<vector>
 	"player.h"

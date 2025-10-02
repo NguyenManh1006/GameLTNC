@@ -31,15 +31,19 @@ int main(int argc, char* argv[]) {
     // 2. Load assets
     SDL_Texture* roadTex   = LoadTexture("image//road.png", renderer);
     SDL_Texture* playerTex = LoadTexture("image//player_car.png", renderer);
-    SDL_Texture* enemyTex  = LoadTexture("image//enemy_car.png", renderer);
+    SDL_Texture* enemyTex1  = LoadTexture("image//enemy_car1.png", renderer);
+    SDL_Texture* enemyTex2  = LoadTexture("image//enemy_car2.png", renderer);
+    SDL_Texture* enemyTex3  = LoadTexture("image//enemy_car3.png", renderer);
 
-    if (!roadTex || !playerTex || !enemyTex) {
+    if (!roadTex || !playerTex || !enemyTex1 || !enemyTex2 || !enemyTex3) {
         std::cout << "Failed to load textures!\n";
         return -1;
     }
 
     // 3. Tạo game + player
-    Game game(renderer, roadTex, enemyTex);
+    std::vector<SDL_Texture*> enemyTextures = { enemyTex1, enemyTex2, enemyTex3 };
+
+    Game game(renderer, roadTex, enemyTextures);
     Player* player = new Player(playerTex, SCREEN_WIDTH/2 - 20, SCREEN_HEIGHT - 100,PLAYER_WIDTH, PLAYER_HEIGHT);
     game.SetPlayer(player);
 
@@ -61,7 +65,9 @@ int main(int argc, char* argv[]) {
     delete player;
     SDL_DestroyTexture(roadTex);
     SDL_DestroyTexture(playerTex);
-    SDL_DestroyTexture(enemyTex);
+    SDL_DestroyTexture(enemyTex1);
+    SDL_DestroyTexture(enemyTex2);
+    SDL_DestroyTexture(enemyTex3);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     Mix_CloseAudio();
