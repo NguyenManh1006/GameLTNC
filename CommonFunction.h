@@ -20,11 +20,11 @@ static SDL_Event g_event;
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 600;
 const int ROAD_WIDTH = 200;
-const int LANE_COUNT = 3;
-const int PLAYER_WIDTH = 40;
-const int PLAYER_HEIGHT = 60;
-const int ENEMY_WIDTH = 40;
-const int ENEMY_HEIGHT = 60;
+const int LANE_COUNT = 5;
+const int PLAYER_WIDTH = 60;
+const int PLAYER_HEIGHT = 90;
+const int ENEMY_WIDTH = 60;
+const int ENEMY_HEIGHT = 90;
 const int SPEED = 5;
 
 const int COLOR_KEY_R = 167;

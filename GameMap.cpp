@@ -21,11 +21,11 @@ void Game::Update() {
 
     // spawn enemy mỗi 60 frame
     if (frameCount % 60 == 0) {
-        int laneWidth = SCREEN_WIDTH / 3;
+        int laneWidth = SCREEN_WIDTH / LANE_COUNT   ;
         int lane = rand() % 3;
         Enemy* enemy = new Enemy(enemyTexture,
-                                 lane * laneWidth + (laneWidth - 40) / 2,
-                                 -60, 40, 60,
+                                 lane * laneWidth + (laneWidth - ENEMY_WIDTH) / 2,
+                                 -ENEMY_HEIGHT, ENEMY_WIDTH, ENEMY_HEIGHT,
                                  5);
         enemies.push_back(enemy);
     }

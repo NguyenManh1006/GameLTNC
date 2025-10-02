@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 
     // 3. Tạo game + player
     Game game(renderer, roadTex, enemyTex);
-    Player* player = new Player(playerTex, SCREEN_WIDTH/2 - 20, SCREEN_HEIGHT - 100, 40, 60);
+    Player* player = new Player(playerTex, SCREEN_WIDTH/2 - 20, SCREEN_HEIGHT - 100,PLAYER_WIDTH, PLAYER_HEIGHT);
     game.SetPlayer(player);
 
     // 4. Vòng lặp game

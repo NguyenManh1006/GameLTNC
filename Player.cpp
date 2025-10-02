@@ -2,7 +2,7 @@
 
 Player::Player(SDL_Texture* tex, int x, int y, int w, int h)
     : Car(tex, x, y, w, h) {
-    lane = 1; // lane giữa
+    lane = 2; // lane giữa
 }
 
 void Player::MoveLeft(int laneWidth) {
@@ -13,7 +13,7 @@ void Player::MoveLeft(int laneWidth) {
 }
 
 void Player::MoveRight(int laneWidth) {
-    if(lane < 2) {
+    if(lane < LANE_COUNT - 1) {
         lane++;
         rect.x = lane * laneWidth + (laneWidth - rect.w)/2;
     }
@@ -23,10 +23,10 @@ void Player::HandleInput(const SDL_Event& e) {
     if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
         case SDLK_LEFT:
-            rect.x -= 20;
+            MoveLeft(SCREEN_WIDTH / LANE_COUNT);
             break;
         case SDLK_RIGHT:
-            rect.x += 20;
+            MoveRight(SCREEN_WIDTH / LANE_COUNT);
             break;
         }
     }
