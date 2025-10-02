@@ -1,7 +1,7 @@
 # depslib dependency file v1.0
 1759161809 source:d:\codeblock\gameltnc\main.cpp
 
-1759334965 source:d:\codeblock\gameltnc\car.cpp
+1759336477 source:d:\codeblock\gameltnc\car.cpp
 	"Car.h"
 
 1759334960 d:\codeblock\gameltnc\car.h
@@ -19,4 +19,10 @@
 	<fstream>
 	<algorithm>
 	<ctime>
+
+1759338814 source:d:\codeblock\gameltnc\player.cpp
+	"Player.h"
+
+1759338814 d:\codeblock\gameltnc\player.h
+	"car.h"
 
