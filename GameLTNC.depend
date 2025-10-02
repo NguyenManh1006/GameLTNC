@@ -1,5 +1,14 @@
 # depslib dependency file v1.0
-1759161809 source:d:\codeblock\gameltnc\main.cpp
+1759390468 source:d:\codeblock\gameltnc\main.cpp
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_ttf.h>
+	<SDL_mixer.h>
+	<iostream>
+	"Commonfunction.h"
+	"Player.h"
+	"Enemy.h"
+	"GameMap.h"
 
 1759336477 source:d:\codeblock\gameltnc\car.cpp
 	"Car.h"
@@ -20,9 +29,26 @@
 	<algorithm>
 	<ctime>
 
-1759338814 source:d:\codeblock\gameltnc\player.cpp
+1759390150 source:d:\codeblock\gameltnc\player.cpp
 	"Player.h"
 
-1759338814 d:\codeblock\gameltnc\player.h
+1759390150 d:\codeblock\gameltnc\player.h
 	"car.h"
+
+1759389497 source:d:\codeblock\gameltnc\enemy.cpp
+	"enemy.h"
+
+1759389497 d:\codeblock\gameltnc\enemy.h
+	"car.h"
+
+1759389836 source:d:\codeblock\gameltnc\gamemap.cpp
+	"GameMap.h"
+	<cstdlib>
+
+1759389836 d:\codeblock\gameltnc\gamemap.h
+	<SDL.h>
+	<vector>
+	"player.h"
+	"enemy.h"
+	"commonfunction.h"
 

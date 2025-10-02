@@ -10,6 +10,9 @@ public:
     void MoveRight(int laneWidth);
     int GetLane() const;
 
+    void HandleInput(const SDL_Event& e);
+    void Update();
+
 private:
     int lane;
 };
