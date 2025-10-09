@@ -46,6 +46,19 @@ void Game::Update() {
         enemy->Update();
     }
 
+     // xóa enemy ra khỏi màn hình
+    enemies.erase(
+        std::remove_if(enemies.begin(), enemies.end(),
+            [](Enemy* e) {
+                if (e->GetRect().y > SCREEN_HEIGHT) {
+                    delete e;
+                    return true;
+                }
+                return false;
+            }),
+        enemies.end()
+    );
+
     // check collision
     for (auto enemy : enemies) {
         if (SDLCommonFunction::CheckCollision(player->GetRect(), enemy->GetRect())) {
