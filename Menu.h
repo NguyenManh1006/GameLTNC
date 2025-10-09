@@ -13,4 +13,13 @@ enum MenuOption {
 };
 
 MenuOption ShowMenu(SDL_Renderer* renderer);
+
+enum GameMode {
+    MODE_EASY,
+    MODE_MEDIUM,
+    MODE_HARD
+};
+
+extern GameMode g_gameMode;
+
 #endif // MENU_H_INCLUDED

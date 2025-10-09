@@ -1,9 +1,15 @@
 #include "GameMap.h"
 #include <cstdlib>
-
-Game::Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_Texture*>& enemyTexList)
+#include "Menu.h"
+Game::Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_Texture*>& enemyTexList, SDL_Texture* heartTex)
     : renderer(renderer), roadTexture(roadTex), enemyTextures(enemyTexList),
-      player(nullptr), frameCount(0), backgroundY(0) {}
+      player(nullptr), frameCount(0), backgroundY(0),
+      heartTexture(heartTex), invincible(false), invincibleStart(0)
+{
+    if (g_gameMode == MODE_EASY) hp = 3;
+    else if (g_gameMode == MODE_MEDIUM) hp = 2;
+    else hp = 1;
+}
 
 Game::~Game() {
     for (auto e : enemies) {
@@ -59,16 +65,26 @@ void Game::Update() {
         enemies.end()
     );
 
-    // check collision
-    for (auto enemy : enemies) {
-        if (SDLCommonFunction::CheckCollision(player->GetRect(), enemy->GetRect())) {
-            SDL_Log("Game Over!");
-        }
-    }
 
     // scroll background
     backgroundY += 5;
     if (backgroundY >= SCREEN_HEIGHT) backgroundY = 0;
+
+    if (invincible && SDL_GetTicks() - invincibleStart > 1000) invincible = false;
+
+    for (auto enemy : enemies) {
+        if (!invincible && SDLCommonFunction::CheckCollision(player->GetRect(), enemy->GetRect())) {
+            hp--;
+            invincible = true;
+            invincibleStart = SDL_GetTicks();
+            if (hp <= 0) {
+                SDL_Log("Game Over!");
+                // Tạm thời kết thúc game
+            }
+            break;
+        }
+    }
+
 }
 
 void Game::Render() {
@@ -87,6 +103,13 @@ void Game::Render() {
     for (auto enemy : enemies) {
         enemy->Render(renderer);
     }
+
+    // vẽ máu
+    for (int i = 0; i < hp; i++) {
+        SDL_Rect heartRect = {10 + i * 35, 10, 30, 30};
+        SDL_RenderCopy(renderer, heartTexture, NULL, &heartRect);
+    }
+
 
     SDL_RenderPresent(renderer);
 }

@@ -1,5 +1,7 @@
 #include "Menu.h"
 
+GameMode g_gameMode = MODE_EASY;
+
 MenuOption ShowMenu(SDL_Renderer* renderer) {
     SDL_Texture* menuTex = LoadTexture("image//menu.png", renderer);
     if (!menuTex) return MENU_QUIT;

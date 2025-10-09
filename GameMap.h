@@ -9,7 +9,8 @@
 
 class Game {
 public:
-    Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_Texture*>& enemyTexList);
+    Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_Texture*>& enemyTexList, SDL_Texture* heartTex);
+
     ~Game();
 
     void SetPlayer(Player* p);
@@ -26,6 +27,11 @@ private:
 
     int frameCount;
     int backgroundY;
+
+    int hp;
+    bool invincible;
+    Uint32 invincibleStart;
+    SDL_Texture* heartTexture;
 };
 
 #endif // GAMEMAP_H_INCLUDED
