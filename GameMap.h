@@ -32,6 +32,13 @@ private:
     bool invincible;
     Uint32 invincibleStart;
     SDL_Texture* heartTexture;
+
+    int score;
+    int highscore;
+    Uint32 lastScoreTime;
+
+    void LoadHighscore();
+    void SaveHighscore();
 };
 
 #endif // GAMEMAP_H_INCLUDED

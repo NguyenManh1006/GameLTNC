@@ -3,7 +3,7 @@
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 #include <iostream>
-#include "Commonfunction.h"
+#include "CommonFunction.h"
 #include "Player.h"
 #include "Enemy.h"
 #include "GameMap.h"
