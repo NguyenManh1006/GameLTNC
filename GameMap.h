@@ -7,6 +7,17 @@
 #include "enemy.h"
 #include "commonfunction.h"
 
+enum class GameState {
+    PLAYING,
+    GAME_OVER
+};
+
+enum class GameOverOption {
+    RETRY,
+    MENU,
+    NONE
+};
+
 class Game {
 public:
     Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_Texture*>& enemyTexList, SDL_Texture* heartTex);
@@ -16,6 +27,12 @@ public:
     void SetPlayer(Player* p);
     void Update();
     void Render();
+    void HandleEvent(SDL_Event e);
+    bool IsRunning() const { return isRunning; }
+    void ResetGame();
+    GameState GetState() const { return state; }
+
+    GameOverOption ShowGameOver(SDL_Renderer* renderer);
 
 private:
     SDL_Renderer* renderer;
@@ -39,6 +56,11 @@ private:
 
     void LoadHighscore();
     void SaveHighscore();
+
+    bool isRunning;
+
+    GameState state;
+    void RenderGameOver();
 };
 
 #endif // GAMEMAP_H_INCLUDED

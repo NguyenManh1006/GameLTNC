@@ -14,45 +14,79 @@ int main(int argc, char* argv[]) {
     if (TTF_Init() == -1) { SDL_Quit(); return -1; }
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { TTF_Quit(); SDL_Quit(); return -1; }
 
-    SDL_Window* window = SDL_CreateWindow("Ne Xe Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_Window* window = SDL_CreateWindow("Game",
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     bool running = true;
     while (running) {
         MenuOption choice = ShowMenu(renderer);
-        if (choice == MENU_QUIT) {
-            running = false;
-            break;
-        }
+        if (choice == MENU_QUIT) break;
+
         else if (choice == MENU_PLAY) {
+            // --- Load texture ---
             SDL_Texture* roadTex   = LoadTexture("image//road.png", renderer);
             SDL_Texture* playerTex = LoadTexture("image//player_car.png", renderer);
             SDL_Texture* enemyTex1 = LoadTexture("image//enemy_car1.png", renderer);
             SDL_Texture* enemyTex2 = LoadTexture("image//enemy_car2.png", renderer);
             SDL_Texture* enemyTex3 = LoadTexture("image//enemy_car3.png", renderer);
-            SDL_Texture* heartTex = LoadTexture("image//heart.png", renderer);
-            if (!roadTex || !playerTex || !enemyTex1 || !enemyTex2 || !enemyTex3 || !heartTex) break;
+            SDL_Texture* heartTex  = LoadTexture("image//heart.png", renderer);
+
+            if (!roadTex || !playerTex || !enemyTex1 || !enemyTex2 || !enemyTex3 || !heartTex)
+                break;
 
             std::vector<SDL_Texture*> enemyTextures = { enemyTex1, enemyTex2, enemyTex3 };
             Game game(renderer, roadTex, enemyTextures, heartTex);
-            Player* player = new Player(playerTex, SCREEN_WIDTH / 2 - 20, SCREEN_HEIGHT - 100, PLAYER_WIDTH, PLAYER_HEIGHT);
+
+            Player* player = new Player(playerTex, SCREEN_WIDTH / 2 - 20,
+                                        SCREEN_HEIGHT - 100, PLAYER_WIDTH, PLAYER_HEIGHT);
             game.SetPlayer(player);
 
             bool inGame = true;
             SDL_Event e;
-            while (inGame) {
+
+            while (inGame && running) {
                 Uint32 frameStart = SDL_GetTicks();
                 while (SDL_PollEvent(&e)) {
-                    if (e.type == SDL_QUIT) { running = false; inGame = false; }
-                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) inGame = false;
-                    player->HandleInput(e);
+                    if (e.type == SDL_QUIT) { inGame = false; running = false; }
+                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
+                        inGame = false;
+                    else
+                        player->HandleInput(e);
                 }
+
                 game.Update();
                 game.Render();
+
+                // Nếu game over
+            if (game.GetState() == GameState::GAME_OVER) {
+    // Khi GameOver, chờ người chơi chọn MENU hoặc RETRY
+    bool waiting = true;
+    while (waiting && running) {
+        SDL_Event ev;
+        while (SDL_PollEvent(&ev)) {
+            if (ev.type == SDL_QUIT) { waiting = false; inGame = false; running = false; }
+            else {
+                game.HandleEvent(ev);  // xử lý click Menu/Retry trong GameMap
+                if (game.GetState() == GameState::PLAYING) { // người chơi bấm Retry
+                    waiting = false;
+                } else if (!game.IsRunning()) { // người chơi bấm Menu
+                    waiting = false;
+                    inGame = false;
+                }
+            }
+        }
+        game.Render();
+        SDL_Delay(16);
+    }
+}
+
                 Uint32 frameTime = SDL_GetTicks() - frameStart;
                 if (frameTime < 16) SDL_Delay(16 - frameTime);
             }
 
+            // --- Cleanup ---
             delete player;
             SDL_DestroyTexture(roadTex);
             SDL_DestroyTexture(playerTex);
@@ -61,6 +95,7 @@ int main(int argc, char* argv[]) {
             SDL_DestroyTexture(enemyTex3);
             SDL_DestroyTexture(heartTex);
         }
+
         else if (choice == MENU_MODE) {
             bool selecting = true;
             SDL_Event e;
@@ -79,11 +114,12 @@ int main(int argc, char* argv[]) {
                 hover[i] = SDL_CreateTextureFromSurface(renderer, s2);
                 rect[i].w = s1->w;
                 rect[i].h = s1->h;
-                rect[i].x = (SCREEN_WIDTH - s1->w)/2;
+                rect[i].x = (SCREEN_WIDTH - s1->w) / 2;
                 rect[i].y = startY + i * 80;
                 SDL_FreeSurface(s1);
                 SDL_FreeSurface(s2);
             }
+
             int hovered = -1;
             while (selecting) {
                 while (SDL_PollEvent(&e)) {
@@ -104,7 +140,7 @@ int main(int argc, char* argv[]) {
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                 SDL_RenderClear(renderer);
                 for (int i = 0; i < 3; i++)
-                    SDL_RenderCopy(renderer, (i==hovered?hover[i]:tex[i]), NULL, &rect[i]);
+                    SDL_RenderCopy(renderer, (i == hovered ? hover[i] : tex[i]), NULL, &rect[i]);
                 SDL_RenderPresent(renderer);
             }
             for (int i = 0; i < 3; i++) {
@@ -114,18 +150,6 @@ int main(int argc, char* argv[]) {
             TTF_CloseFont(font);
         }
 
-        else if (choice == MENU_SCORE) {
-            SDL_SetRenderDrawColor(renderer, 64, 0, 0, 255);
-            SDL_RenderClear(renderer);
-            SDL_RenderPresent(renderer);
-            SDL_Delay(1000);
-        }
-        else if (choice == MENU_SETTING) {
-            SDL_SetRenderDrawColor(renderer, 0, 64, 0, 255);
-            SDL_RenderClear(renderer);
-            SDL_RenderPresent(renderer);
-            SDL_Delay(1000);
-        }
     }
 
     SDL_DestroyRenderer(renderer);
