@@ -197,23 +197,23 @@ void Game::RenderGameOver() {
     TTF_Font* font = TTF_OpenFont("font//dlxfont_.ttf", 20);
     if (!font) return;
 
-    SDL_Texture* bg = IMG_LoadTexture(renderer, "image/unnamed.jpg");
-if (bg) {
-    int imgW, imgH;
-    SDL_QueryTexture(bg, NULL, NULL, &imgW, &imgH);
+    SDL_Texture* bg = IMG_LoadTexture(renderer, "image/gameover.jpg");
+        if (bg) {
+            int imgW, imgH;
+            SDL_QueryTexture(bg, NULL, NULL, &imgW, &imgH);
 
-    // Tính toán vị trí hiển thị giữa màn hình
-    int targetW = imgW / 2; // thu nhỏ 50%
-    int targetH = imgH / 2;
-    SDL_Rect dstRect;
-    dstRect.x = SCREEN_WIDTH / 2 - targetW / 2;
-    dstRect.y = SCREEN_HEIGHT / 2 - targetH / 2;
-    dstRect.w = targetW;
-    dstRect.h = targetH;
+            // Tính toán vị trí hiển thị giữa màn hình
+            int targetW = imgW / 2; // thu nhỏ 50%
+            int targetH = imgH / 2;
+            SDL_Rect dstRect;
+            dstRect.x = SCREEN_WIDTH / 2 - targetW / 2;
+            dstRect.y = SCREEN_HEIGHT / 2 - targetH / 2;
+            dstRect.w = targetW;
+            dstRect.h = targetH;
 
-    SDL_RenderCopy(renderer, bg, NULL, &dstRect);
-    SDL_DestroyTexture(bg);
-}
+            SDL_RenderCopy(renderer, bg, NULL, &dstRect);
+            SDL_DestroyTexture(bg);
+        }
 
     // Game Over text
     SDL_Surface* sTitle = TTF_RenderText_Solid(font, "GAME OVER", white);

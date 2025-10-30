@@ -3,6 +3,8 @@
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 #include <iostream>
+#include <vector>
+#include <string>
 #include "CommonFunction.h"
 #include "Player.h"
 #include "Enemy.h"
@@ -25,7 +27,7 @@ int main(int argc, char* argv[]) {
         if (choice == MENU_QUIT) break;
 
         else if (choice == MENU_PLAY) {
-            // --- Load texture ---
+            // --- 1. Load texture (Làm 1 lần) ---
             SDL_Texture* roadTex   = LoadTexture("image//road.png", renderer);
             SDL_Texture* playerTex = LoadTexture("image//player_car.png", renderer);
             SDL_Texture* enemyTex1 = LoadTexture("image//enemy_car1.png", renderer);
@@ -37,57 +39,92 @@ int main(int argc, char* argv[]) {
                 break;
 
             std::vector<SDL_Texture*> enemyTextures = { enemyTex1, enemyTex2, enemyTex3 };
-            Game game(renderer, roadTex, enemyTextures, heartTex);
 
-            Player* player = new Player(playerTex, SCREEN_WIDTH / 2 - 20,
-                                        SCREEN_HEIGHT - 100, PLAYER_WIDTH, PLAYER_HEIGHT);
-            game.SetPlayer(player);
+            bool shouldRestart = false;
 
-            bool inGame = true;
-            SDL_Event e;
+            // --- 2. Vòng lặp chính cho Game Session (Bao gồm Restart) ---
+            do {
+                shouldRestart = false; // Mặc định là không restart
+                PauseMenu loopResult = RESULT_QUIT_TO_MENU; // Mặc định thoát về Menu
 
-            while (inGame && running) {
-                Uint32 frameStart = SDL_GetTicks();
-                while (SDL_PollEvent(&e)) {
-                    if (e.type == SDL_QUIT) { inGame = false; running = false; }
-                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
-                        inGame = false;
-                    else
-                        player->HandleInput(e);
+                // --- 3. Khởi tạo Game/Player cho lần chơi mới ---
+                Game game(renderer, roadTex, enemyTextures, heartTex);
+                Player* player = new Player(playerTex, SCREEN_WIDTH / 2 - 20,
+                                            SCREEN_HEIGHT - 100, PLAYER_WIDTH, PLAYER_HEIGHT);
+                game.SetPlayer(player);
+
+                bool inGame = true;
+                SDL_Event e;
+
+                // --- 4. Game Loop (Chơi game) ---
+                while (inGame && running) {
+                    Uint32 frameStart = SDL_GetTicks();
+
+                    // --- Xử lý sự kiện (Input Handling) ---
+                    while (SDL_PollEvent(&e)) {
+                        if (e.type == SDL_QUIT) { inGame = false; running = false; loopResult = RESULT_EXIT_GAME; }
+                        else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
+                            // Gọi màn hình Pause
+                            loopResult = ShowPauseMenu(renderer);
+                            if (loopResult != RESULT_CONTINUE_GAME) {
+                                inGame = false; // Thoát vòng lặp game hiện tại
+                            }
+                        }
+                        else
+                            player->HandleInput(e);
+                    }
+
+                    // --- Cập nhật và Render ---
+                    if (inGame) { // Chỉ cập nhật khi không bị PAUSED
+                        game.Update();
+                        game.Render();
+                    }
+
+                    // --- Xử lý Game Over ---
+                    if (game.GetState() == GameState::GAME_OVER) {
+                        bool waiting = true;
+                        while (waiting && running) {
+                            SDL_Event ev;
+                            while (SDL_PollEvent(&ev)) {
+                                if (ev.type == SDL_QUIT) {
+                                    waiting = false; inGame = false; running = false; loopResult = RESULT_EXIT_GAME;
+                                }
+                                else {
+                                    game.HandleEvent(ev);
+                                    if (game.GetState() == GameState::PLAYING) { // người chơi bấm Retry
+                                        waiting = false;
+                                        inGame = false;
+                                        loopResult = RESULT_RESTART_GAME;
+                                    } else if (!game.IsRunning()) { // người chơi bấm Menu
+                                        waiting = false;
+                                        inGame = false;
+                                        loopResult = RESULT_QUIT_TO_MENU;
+                                    }
+                                }
+                            }
+                            game.Render();
+                            SDL_Delay(16);
+                        }
+                    }
+
+                    // --- Giới hạn tốc độ khung hình (Frame Limiting) ---
+                    Uint32 frameTime = SDL_GetTicks() - frameStart;
+                    if (frameTime < 16) SDL_Delay(16 - frameTime);
+                } // End while (inGame && running)
+
+                // --- 5. Kiểm tra kết quả sau khi vòng lặp game kết thúc ---
+                if (loopResult == RESULT_RESTART_GAME) {
+                    shouldRestart = true; // Thiết lập cờ để vòng lặp do-while chạy lại
+                } else if (loopResult == RESULT_EXIT_GAME) {
+                    running = false; // Thoát chương trình
                 }
 
-                game.Update();
-                game.Render();
+                // Cleanup Player sau mỗi lần chơi/restart
+                delete player;
 
-                // Nếu game over
-            if (game.GetState() == GameState::GAME_OVER) {
-    // Khi GameOver, chờ người chơi chọn MENU hoặc RETRY
-    bool waiting = true;
-    while (waiting && running) {
-        SDL_Event ev;
-        while (SDL_PollEvent(&ev)) {
-            if (ev.type == SDL_QUIT) { waiting = false; inGame = false; running = false; }
-            else {
-                game.HandleEvent(ev);  // xử lý click Menu/Retry trong GameMap
-                if (game.GetState() == GameState::PLAYING) { // người chơi bấm Retry
-                    waiting = false;
-                } else if (!game.IsRunning()) { // người chơi bấm Menu
-                    waiting = false;
-                    inGame = false;
-                }
-            }
-        }
-        game.Render();
-        SDL_Delay(16);
-    }
-}
+            } while (shouldRestart && running); // End do-while (chơi/restart)
 
-                Uint32 frameTime = SDL_GetTicks() - frameStart;
-                if (frameTime < 16) SDL_Delay(16 - frameTime);
-            }
-
-            // --- Cleanup ---
-            delete player;
+            // --- 6. Cleanup Texture (Chỉ làm 1 lần khi thoát hẳn khỏi MENU_PLAY) ---
             SDL_DestroyTexture(roadTex);
             SDL_DestroyTexture(playerTex);
             SDL_DestroyTexture(enemyTex1);
@@ -97,6 +134,7 @@ int main(int argc, char* argv[]) {
         }
 
         else if (choice == MENU_MODE) {
+            // Logic chọn độ khó (giữ nguyên)
             bool selecting = true;
             SDL_Event e;
             TTF_Font* font = TTF_OpenFont("font//dlxfont_.ttf", 32);
@@ -149,9 +187,9 @@ int main(int argc, char* argv[]) {
             }
             TTF_CloseFont(font);
         }
-
     }
 
+    // 7. Dọn dẹp cuối cùng
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     Mix_CloseAudio();

@@ -14,6 +14,7 @@ enum MenuOption {
 
 MenuOption ShowMenu(SDL_Renderer* renderer);
 
+
 enum GameMode {
     MODE_EASY,
     MODE_MEDIUM,
@@ -21,5 +22,14 @@ enum GameMode {
 };
 
 extern GameMode g_gameMode;
+
+enum PauseMenu {
+    RESULT_CONTINUE_GAME,
+    RESULT_RESTART_GAME,
+    RESULT_QUIT_TO_MENU,
+    RESULT_EXIT_GAME
+};
+
+PauseMenu ShowPauseMenu(SDL_Renderer* renderer);
 
 #endif // MENU_H_INCLUDED

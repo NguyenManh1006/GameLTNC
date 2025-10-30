@@ -1,10 +1,12 @@
 # depslib dependency file v1.0
-1761211827 source:d:\codeblock\gameltnc\main.cpp
+1761819359 source:d:\codeblock\gameltnc\main.cpp
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
 	<SDL_mixer.h>
 	<iostream>
+	<vector>
+	<string>
 	"CommonFunction.h"
 	"Player.h"
 	"Enemy.h"
@@ -42,7 +44,7 @@
 1759389497 d:\codeblock\gameltnc\enemy.h
 	"car.h"
 
-1761216268 source:d:\codeblock\gameltnc\gamemap.cpp
+1761219795 source:d:\codeblock\gameltnc\gamemap.cpp
 	"GameMap.h"
 	<cstdlib>
 	"Menu.h"
@@ -56,9 +58,9 @@
 	"enemy.h"
 	"commonfunction.h"
 
-1760008149 source:d:\codeblock\gameltnc\menu.cpp
+1761821074 source:d:\codeblock\gameltnc\menu.cpp
 	"Menu.h"
 
-1760008149 d:\codeblock\gameltnc\menu.h
+1761821302 d:\codeblock\gameltnc\menu.h
 	"CommonFunction.h"
 

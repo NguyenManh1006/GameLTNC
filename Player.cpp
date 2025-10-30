@@ -25,7 +25,13 @@ void Player::HandleInput(const SDL_Event& e) {
         case SDLK_LEFT:
             MoveLeft(SCREEN_WIDTH / LANE_COUNT);
             break;
+        case SDLK_a:
+            MoveLeft(SCREEN_WIDTH / LANE_COUNT);
+            break;
         case SDLK_RIGHT:
+            MoveRight(SCREEN_WIDTH / LANE_COUNT);
+            break;
+        case SDLK_d:
             MoveRight(SCREEN_WIDTH / LANE_COUNT);
             break;
         }
