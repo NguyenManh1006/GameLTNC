@@ -3,8 +3,18 @@
 #include "Menu.h"
 #include <fstream>
 #include <string>
+#include "PowerUp.h"
+#include <algorithm>
 
-Game::Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_Texture*>& enemyTexList, SDL_Texture* heartTex)
+
+#define MAX_HP 3
+#define SHIELD_DURATION_MS 10000
+#define POWERUP_SPAWN_INTERVAL_MS 10000
+#define POWERUP_WIDTH 40
+#define POWERUP_HEIGHT 40
+
+// CẬP NHẬT CONSTRUCTOR
+Game::Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_Texture*>& enemyTexList, SDL_Texture* heartTex, SDL_Texture* shieldTex, SDL_Texture* healTex)
     : renderer(renderer),
       roadTexture(roadTex),
       enemyTextures(enemyTexList),
@@ -17,9 +27,15 @@ Game::Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_T
       score(0),
       lastScoreTime(SDL_GetTicks()),
       state(GameState::PLAYING),
-      isRunning(true)
+      isRunning(true),
+      shieldTexture(shieldTex),
+      healTexture(healTex),
+      hasShield(false),
+      shieldStart(0),
+      lastPowerUpSpawnTime(SDL_GetTicks()),
+      maxHp(MAX_HP)
 {
-    if (g_gameMode == MODE_EASY) hp = 3;
+    if (g_gameMode == MODE_EASY) hp = MAX_HP;
     else if (g_gameMode == MODE_MEDIUM) hp = 2;
     else hp = 1;
 
@@ -31,6 +47,11 @@ Game::~Game() {
         delete e;
     }
     enemies.clear();
+
+    for (auto p : powerups) {
+        delete p;
+    }
+    powerups.clear();
 }
 
 void Game::SetPlayer(Player* p) {
@@ -40,18 +61,15 @@ void Game::SetPlayer(Player* p) {
 void Game::Update() {
     frameCount++;
 
-    // spawn enemy mỗi 60 frame
-    // spawn enemy mỗi 60 frame
+    // spawn enemy
     if (frameCount % 60 == 0) {
         int laneWidth = SCREEN_WIDTH / LANE_COUNT;
         int lane = rand() % LANE_COUNT;
 
-        // chọn random texture enemy
         int texIndex = rand() % enemyTextures.size();
         SDL_Texture* tex = enemyTextures[texIndex];
 
-        // random speed mỗi enemy
-        int speed = 4 + rand() % 5; // từ 3 -> 7
+        int speed = 4 + rand() % 5;
 
         Enemy* enemy = new Enemy(tex,
                                  lane * laneWidth + (laneWidth - ENEMY_WIDTH) / 2,
@@ -62,12 +80,35 @@ void Game::Update() {
         enemies.push_back(enemy);
     }
 
-    // update enemy
+    // spawn powerup
+    if (SDL_GetTicks() - lastPowerUpSpawnTime >= POWERUP_SPAWN_INTERVAL_MS) {
+        lastPowerUpSpawnTime = SDL_GetTicks();
+
+        // 20% tỉ lệ rơi ra
+        if (rand() % 100 < 20) {
+            int laneWidth = SCREEN_WIDTH / LANE_COUNT;
+            int lane = rand() % LANE_COUNT;
+            int speed = 4 + rand() % 3;
+
+            // random powerup
+            PowerUpType type = (rand() % 2 == 0) ? PowerUpType::SHIELD : PowerUpType::HEAL;
+            SDL_Texture* tex = (type == PowerUpType::SHIELD) ? shieldTexture : healTexture;
+
+            PowerUp* p = new PowerUp(tex,
+                                     lane * laneWidth + (laneWidth - POWERUP_WIDTH) / 2,
+                                     -POWERUP_HEIGHT,
+                                     POWERUP_WIDTH, POWERUP_HEIGHT,
+                                     speed, type);
+
+            powerups.push_back(p);
+        }
+    }
+
+    // --- 3. Update và Xóa Enemy ---
     for (auto enemy : enemies) {
         enemy->Update();
     }
 
-     // xóa enemy ra khỏi màn hình
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(),
             [](Enemy* e) {
@@ -80,21 +121,71 @@ void Game::Update() {
         enemies.end()
     );
 
+    // xóa powerup
+    for (auto powerup : powerups) {
+        powerup->Update();
+    }
 
-    // scroll background
+    powerups.erase(
+        std::remove_if(powerups.begin(), powerups.end(),
+            [](PowerUp* p) {
+                if (p->GetRect().y > SCREEN_HEIGHT) {
+                    delete p;
+                    return true;
+                }
+                return false;
+            }),
+        powerups.end()
+    );
+
     backgroundY += 5;
     if (backgroundY >= SCREEN_HEIGHT) backgroundY = 0;
 
+    // bất tử
     if (invincible && SDL_GetTicks() - invincibleStart > 1000) invincible = false;
+    if (hasShield && SDL_GetTicks() - shieldStart > SHIELD_DURATION_MS) hasShield = false;
 
+    // va chạm powerup
+    for (auto it = powerups.begin(); it != powerups.end(); ) {
+        if (SDLCommonFunction::CheckCollision(player->GetRect(), (*it)->GetRect())) {
+
+            PowerUpType type = (*it)->GetType();
+
+            if (type == PowerUpType::SHIELD) {
+                hasShield = true;
+                shieldStart = SDL_GetTicks();
+            } else if (type == PowerUpType::HEAL) {
+                if (hp < maxHp) { // Chỉ hồi máu nếu chưa đầy
+                    hp++;
+                }
+            }
+
+            delete *it;
+            it = powerups.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+
+    // va chạm enemy
     for (auto enemy : enemies) {
         if (!invincible && SDLCommonFunction::CheckCollision(player->GetRect(), enemy->GetRect())) {
-            hp--;
-            invincible = true;
-            invincibleStart = SDL_GetTicks();
-            if (hp <= 0) {
-                SaveHighscore();
-                state = GameState::GAME_OVER;
+
+            if (hasShield) {
+                // Đỡ 1 đòn: Mất khiên, được bất tử ngắn
+                hasShield = false;
+                invincible = true;
+                invincibleStart = SDL_GetTicks();
+            } else {
+                // mất máu
+                hp--;
+                invincible = true;
+                invincibleStart = SDL_GetTicks();
+                if (hp <= 0) {
+                    SaveHighscore();
+                    state = GameState::GAME_OVER;
+                }
             }
 
             break;
@@ -117,8 +208,40 @@ void Game::Render() {
     SDL_RenderCopy(renderer, roadTexture, NULL, &dst1);
     SDL_RenderCopy(renderer, roadTexture, NULL, &dst2);
 
+    //vẽ power-up
+    for (auto powerup : powerups) {
+        powerup->Render(renderer);
+    }
+
     // vẽ player
-    if (player) player->Render(renderer);
+    if (player) {
+        if (state == GameState::PLAYING) {
+            bool shouldRender = true;
+            if (invincible) {
+                if (frameCount % 12 < 6) shouldRender = false;
+            }
+
+            if (shouldRender) {
+                player->Render(renderer);
+            }
+        }
+    }
+
+    // vẽ khiên
+    if (hasShield && player && state == GameState::PLAYING) {
+        SDL_Rect playerRect = player->GetRect();
+        SDL_Rect shieldRect = playerRect;
+
+        // khiên trên xe
+        int offset = -15;
+        shieldRect.x -= offset;
+        shieldRect.y -= offset;
+        shieldRect.w += offset * 2;
+        shieldRect.h += offset * 2;
+
+        SDL_RenderCopy(renderer, shieldTexture, NULL, &shieldRect);
+    }
+
 
     // vẽ enemy
     for (auto enemy : enemies) {
@@ -131,7 +254,7 @@ void Game::Render() {
         SDL_RenderCopy(renderer, heartTexture, NULL, &heartRect);
     }
 
-    // vẽ score
+    // vẽ score và highscore
     TTF_Font* font = TTF_OpenFont("font//dlxfont_.ttf", 10);
     if (font) {
         SDL_Color white = {255, 255, 255, 255};
@@ -202,8 +325,7 @@ void Game::RenderGameOver() {
             int imgW, imgH;
             SDL_QueryTexture(bg, NULL, NULL, &imgW, &imgH);
 
-            // Tính toán vị trí hiển thị giữa màn hình
-            int targetW = imgW / 2; // thu nhỏ 50%
+            int targetW = imgW / 2;
             int targetH = imgH / 2;
             SDL_Rect dstRect;
             dstRect.x = SCREEN_WIDTH / 2 - targetW / 2;
@@ -241,7 +363,7 @@ void Game::RenderGameOver() {
     SDL_FreeSurface(sHigh);
     SDL_DestroyTexture(tHigh);
 
-    // Nút Menu (trái)
+    // Nút Menu
     std::string menuText = "MENU";
     SDL_Surface* sMenu = TTF_RenderText_Solid(font, menuText.c_str(), white);
     SDL_Texture* tMenu = SDL_CreateTextureFromSurface(renderer, sMenu);
@@ -250,7 +372,7 @@ void Game::RenderGameOver() {
     SDL_FreeSurface(sMenu);
     SDL_DestroyTexture(tMenu);
 
-    // Nút Retry (phải)
+    // Nút Retry
     std::string retryText = "RETRY";
     SDL_Surface* sRetry = TTF_RenderText_Solid(font, retryText.c_str(), white);
     SDL_Texture* tRetry = SDL_CreateTextureFromSurface(renderer, sRetry);
@@ -282,7 +404,7 @@ void Game::HandleEvent(SDL_Event e) {
         int x = e.button.x;
         int y = e.button.y;
 
-        // Xác định vùng nút Menu và Retry (tọa độ khớp với RenderGameOver)
+        // vị trí
         SDL_Rect menuRect = {SCREEN_WIDTH/2 - 200, SCREEN_HEIGHT/2 + 60, 120, 50};
         SDL_Rect retryRect = {SCREEN_WIDTH/2 + 80, SCREEN_HEIGHT/2 + 60, 120, 50};
 
@@ -295,23 +417,39 @@ void Game::HandleEvent(SDL_Event e) {
         // Click vào RETRY → chơi lại
         if (x >= retryRect.x && x <= retryRect.x + retryRect.w &&
             y >= retryRect.y && y <= retryRect.y + retryRect.h) {
-            ResetGame();                // Bạn cần viết hàm ResetGame() để reset hp, score, enemy,...
-            state = GameState::PLAYING; // Chuyển lại trạng thái đang chơi
+            ResetGame();
+            state = GameState::PLAYING;
         }
     }
 }
 
 void Game::ResetGame() {
     // Xóa dữ liệu cũ
+    for (auto e : enemies) {
+        delete e;
+    }
     enemies.clear();
+
+    for (auto p : powerups) {
+        delete p;
+    }
+    powerups.clear();
+
     frameCount = 0;
     backgroundY = 0;
     invincible = false;
     invincibleStart = 0;
+
+    // Reset Shield
+    hasShield = false;
+    shieldStart = 0;
+    lastPowerUpSpawnTime = SDL_GetTicks();
+
     score = 0;
     lastScoreTime = SDL_GetTicks();
 
-    if (g_gameMode == MODE_EASY) hp = 3;
+    // Reset HP
+    if (g_gameMode == MODE_EASY) hp = maxHp;
     else if (g_gameMode == MODE_MEDIUM) hp = 2;
     else hp = 1;
 
@@ -324,4 +462,3 @@ void Game::ResetGame() {
 
     state = GameState::PLAYING; // quay lại trạng thái đang chơi
 }
-

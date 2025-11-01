@@ -6,6 +6,7 @@
 #include "player.h"
 #include "enemy.h"
 #include "commonfunction.h"
+#include "PowerUp.h"
 
 enum class GameState {
     PLAYING,
@@ -20,7 +21,10 @@ enum class GameOverOption {
 
 class Game {
 public:
-    Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_Texture*>& enemyTexList, SDL_Texture* heartTex);
+    Game(SDL_Renderer* renderer, SDL_Texture* roadTex,
+        const std::vector<SDL_Texture*>& enemyTexList,
+        SDL_Texture* heartTex, SDL_Texture* shieldTex,
+        SDL_Texture* healTex);
 
     ~Game();
 
@@ -42,12 +46,21 @@ private:
     Player* player;
     std::vector<Enemy*> enemies;
 
+    std::vector<PowerUp*> powerups;
+    SDL_Texture* shieldTexture;
+    SDL_Texture* healTexture;
+
     int frameCount;
     int backgroundY;
 
     int hp;
+    int maxHp;
     bool invincible;
     Uint32 invincibleStart;
+
+    bool hasShield;
+    Uint32 shieldStart;
+    Uint32 lastPowerUpSpawnTime;
     SDL_Texture* heartTexture;
 
     int score;

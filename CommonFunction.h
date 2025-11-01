@@ -1,6 +1,12 @@
 #ifndef COMMONFUNCTION_H_INCLUDED
 #define COMMONFUNCTION_H_INCLUDED
 
+#define POWERUP_WIDTH 40
+#define POWERUP_HEIGHT 40
+#define MAX_HP 3
+#define SHIELD_DURATION 10000
+#define POWERUP_SPAWN 10000
+
 #include <windows.h>
 #include <SDL.h>
 #include <SDL_image.h>
@@ -32,6 +38,12 @@ const int COLOR_KEY_G = 175;
 const int COLOR_KEY_B = 180;
 
 const int RENDER_DRAW_COLOR = 0Xff;
+
+enum class PowerUpType {
+    SHIELD,
+    HEAL
+};
+
 
 typedef struct Input {
     int left_ , right_;

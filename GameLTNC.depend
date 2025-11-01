@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1761819359 source:d:\codeblock\gameltnc\main.cpp
+1762015140 source:d:\codeblock\gameltnc\main.cpp
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
@@ -19,7 +19,7 @@
 1759334960 d:\codeblock\gameltnc\car.h
 	"CommonFunction.h"
 
-1759399118 d:\codeblock\gameltnc\commonfunction.h
+1762015140 d:\codeblock\gameltnc\commonfunction.h
 	<windows.h>
 	<SDL.h>
 	<SDL_image.h>
@@ -32,7 +32,7 @@
 	<algorithm>
 	<ctime>
 
-1759399118 source:d:\codeblock\gameltnc\player.cpp
+1761821361 source:d:\codeblock\gameltnc\player.cpp
 	"Player.h"
 
 1759390150 d:\codeblock\gameltnc\player.h
@@ -44,23 +44,33 @@
 1759389497 d:\codeblock\gameltnc\enemy.h
 	"car.h"
 
-1761219795 source:d:\codeblock\gameltnc\gamemap.cpp
+1762015140 source:d:\codeblock\gameltnc\gamemap.cpp
 	"GameMap.h"
 	<cstdlib>
 	"Menu.h"
 	<fstream>
 	<string>
+	"PowerUp.h"
+	<algorithm>
 
-1760614005 d:\codeblock\gameltnc\gamemap.h
+1762015307 d:\codeblock\gameltnc\gamemap.h
 	<SDL.h>
 	<vector>
 	"player.h"
 	"enemy.h"
 	"commonfunction.h"
+	"PowerUp.h"
 
 1761821074 source:d:\codeblock\gameltnc\menu.cpp
 	"Menu.h"
 
 1761821302 d:\codeblock\gameltnc\menu.h
+	"CommonFunction.h"
+
+1762015140 source:d:\codeblock\gameltnc\powerup.cpp
+	"PowerUp.h"
+
+1762015140 d:\codeblock\gameltnc\powerup.h
+	"Car.h"
 	"CommonFunction.h"
 
