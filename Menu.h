@@ -35,4 +35,13 @@ PauseMenu ShowPauseMenu(SDL_Renderer* renderer);
 std::vector<int> LoadHighScores();
 void ShowHighScores(SDL_Renderer* renderer);
 
+extern int g_volume;
+extern Mix_Music* g_music;
+
+void ShowSettingMenu(SDL_Renderer* renderer);
+void ToggleMusic(bool play);
+void UpdateMusicVolume();
+
+void ShowModeMenu(SDL_Renderer* renderer);
+
 #endif // MENU_H_INCLUDED

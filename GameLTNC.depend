@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1762016303 source:d:\codeblock\gameltnc\main.cpp
+1762081741 source:d:\codeblock\gameltnc\main.cpp
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
@@ -62,11 +62,13 @@
 	"commonfunction.h"
 	"PowerUp.h"
 
-1762078199 source:d:\codeblock\gameltnc\menu.cpp
+1762081414 source:d:\codeblock\gameltnc\menu.cpp
 	"Menu.h"
-	"sstream"
+	<sstream>
+	<iomanip>
+	<algorithm>
 
-1762073201 d:\codeblock\gameltnc\menu.h
+1762081741 d:\codeblock\gameltnc\menu.h
 	"CommonFunction.h"
 
 1762015140 source:d:\codeblock\gameltnc\powerup.cpp

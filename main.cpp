@@ -12,6 +12,9 @@
 #include "Menu.h"
 #include "PowerUp.h"
 
+// Biến toàn cục g_music được khai báo extern trong Menu.h
+extern Mix_Music* g_music;
+
 int main(int argc, char* argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) return -1;
     if (TTF_Init() == -1) { SDL_Quit(); return -1; }
@@ -24,6 +27,7 @@ int main(int argc, char* argv[]) {
 
     bool running = true;
     while (running) {
+        // Nhạc nền phải TẮT khi ở Menu chính
         MenuOption choice = ShowMenu(renderer);
         if (choice == MENU_QUIT) break;
 
@@ -57,6 +61,9 @@ int main(int argc, char* argv[]) {
                 bool inGame = true;
                 SDL_Event e;
 
+                // BẬT NHẠC KHI BẮT ĐẦU CHƠI GAME
+                ToggleMusic(true);
+
                 // chơi game
                 while (inGame && running) {
                     Uint32 frameStart = SDL_GetTicks();
@@ -66,8 +73,12 @@ int main(int argc, char* argv[]) {
                         if (e.type == SDL_QUIT) { inGame = false; running = false; loopResult = RESULT_EXIT_GAME; }
                         else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
                             // pause game
+                            ToggleMusic(false); // tắt nhạc khi pause
                             loopResult = ShowPauseMenu(renderer);
-                            if (loopResult != RESULT_CONTINUE_GAME) {
+
+                            if (loopResult == RESULT_CONTINUE_GAME) {
+                                ToggleMusic(true); // bật nhạc khi bấm continume
+                            } else {
                                 inGame = false; // Thoát vòng lặp game
                             }
                         }
@@ -82,6 +93,7 @@ int main(int argc, char* argv[]) {
 
                     // gameover
                     if (game.GetState() == GameState::GAME_OVER) {
+                        ToggleMusic(false); //tắt nhạc
                         bool waiting = true;
                         while (waiting && running) {
                             SDL_Event ev;
@@ -111,6 +123,9 @@ int main(int argc, char* argv[]) {
                     if (frameTime < 16) SDL_Delay(16 - frameTime);
                 }
 
+                // Đảm bảo nhạc TẮT khi thoát khỏi vòng lặp game
+                ToggleMusic(false);
+
                 if (loopResult == RESULT_RESTART_GAME) {
                     shouldRestart = true;
                 } else if (loopResult == RESULT_EXIT_GAME) {
@@ -134,65 +149,18 @@ int main(int argc, char* argv[]) {
         }
 
         else if (choice == MENU_MODE) {
-            // chọn độ khó
-            bool selecting = true;
-            SDL_Event e;
-            TTF_Font* font = TTF_OpenFont("font//dlxfont_.ttf", 32);
-            SDL_Color red = {255, 0, 0, 255};
-            SDL_Color yellow = {255, 255, 0, 255};
-            std::string opts[3] = {"EASY", "MEDIUM", "HARD"};
-            SDL_Texture* tex[3];
-            SDL_Texture* hover[3];
-            SDL_Rect rect[3];
-            int startY = (SCREEN_HEIGHT - 3 * 60) / 2;
-            for (int i = 0; i < 3; i++) {
-                SDL_Surface* s1 = TTF_RenderText_Solid(font, opts[i].c_str(), red);
-                SDL_Surface* s2 = TTF_RenderText_Solid(font, opts[i].c_str(), yellow);
-                tex[i] = SDL_CreateTextureFromSurface(renderer, s1);
-                hover[i] = SDL_CreateTextureFromSurface(renderer, s2);
-                rect[i].w = s1->w;
-                rect[i].h = s1->h;
-                rect[i].x = (SCREEN_WIDTH - s1->w) / 2;
-                rect[i].y = startY + i * 80;
-                SDL_FreeSurface(s1);
-                SDL_FreeSurface(s2);
-            }
-
-            int hovered = -1;
-            while (selecting) {
-                while (SDL_PollEvent(&e)) {
-                    if (e.type == SDL_QUIT) { selecting = false; running = false; }
-                    else if (e.type == SDL_MOUSEMOTION) {
-                        int mx = e.motion.x, my = e.motion.y;
-                        hovered = -1;
-                        for (int i = 0; i < 3; i++)
-                            if (mx >= rect[i].x && mx <= rect[i].x + rect[i].w &&
-                                my >= rect[i].y && my <= rect[i].y + rect[i].h)
-                                hovered = i;
-                    } else if (e.type == SDL_MOUSEBUTTONDOWN && hovered != -1) {
-                        g_gameMode = (GameMode)hovered;
-                        selecting = false;
-                    } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
-                        selecting = false;
-                }
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_RenderClear(renderer);
-                for (int i = 0; i < 3; i++)
-                    SDL_RenderCopy(renderer, (i == hovered ? hover[i] : tex[i]), NULL, &rect[i]);
-                SDL_RenderPresent(renderer);
-            }
-            for (int i = 0; i < 3; i++) {
-                SDL_DestroyTexture(tex[i]);
-                SDL_DestroyTexture(hover[i]);
-            }
-            TTF_CloseFont(font);
+            ShowModeMenu(renderer);
         }
     }
 
-    // clear
+    // Dọn dẹp cuối cùng
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+
+    // Giải phóng tài nguyên nhạc
+    if (g_music) Mix_FreeMusic(g_music);
     Mix_CloseAudio();
+
     TTF_Quit();
     SDL_Quit();
     return 0;
