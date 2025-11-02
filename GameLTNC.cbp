@@ -43,6 +43,8 @@
 		<Unit filename="Menu.h" />
 		<Unit filename="Player.cpp" />
 		<Unit filename="Player.h" />
+		<Unit filename="PowerUp.cpp" />
+		<Unit filename="PowerUp.h" />
 		<Unit filename="main.cpp" />
 		<Extensions />
 	</Project>

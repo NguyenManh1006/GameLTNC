@@ -32,4 +32,7 @@ enum PauseMenu {
 
 PauseMenu ShowPauseMenu(SDL_Renderer* renderer);
 
+std::vector<int> LoadHighScores();
+void ShowHighScores(SDL_Renderer* renderer);
+
 #endif // MENU_H_INCLUDED
