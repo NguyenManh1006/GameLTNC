@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1762354820 source:d:\codeblock\gameltnc\main.cpp
+1762359886 source:d:\codeblock\gameltnc\main.cpp
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
@@ -20,7 +20,7 @@
 1759334960 d:\codeblock\gameltnc\car.h
 	"CommonFunction.h"
 
-1762015140 d:\codeblock\gameltnc\commonfunction.h
+1762359905 d:\codeblock\gameltnc\commonfunction.h
 	<windows.h>
 	<SDL.h>
 	<SDL_image.h>
@@ -45,7 +45,7 @@
 1759389497 d:\codeblock\gameltnc\enemy.h
 	"car.h"
 
-1762355599 source:d:\codeblock\gameltnc\gamemap.cpp
+1762359116 source:d:\codeblock\gameltnc\gamemap.cpp
 	"GameMap.h"
 	<cstdlib>
 	"Menu.h"
@@ -54,8 +54,9 @@
 	"PowerUp.h"
 	<algorithm>
 	<SDL_mixer.h>
+	"CommonFunction.h"
 
-1762355599 d:\codeblock\gameltnc\gamemap.h
+1762358286 d:\codeblock\gameltnc\gamemap.h
 	<SDL.h>
 	<vector>
 	"player.h"
@@ -64,13 +65,13 @@
 	"PowerUp.h"
 	<SDL_mixer.h>
 
-1762355599 source:d:\codeblock\gameltnc\menu.cpp
+1762358286 source:d:\codeblock\gameltnc\menu.cpp
 	"Menu.h"
 	<sstream>
 	<iomanip>
 	<algorithm>
 
-1762081741 d:\codeblock\gameltnc\menu.h
+1762359886 d:\codeblock\gameltnc\menu.h
 	"CommonFunction.h"
 
 1762015140 source:d:\codeblock\gameltnc\powerup.cpp

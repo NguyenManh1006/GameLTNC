@@ -5,23 +5,20 @@
 
 GameMode g_gameMode = MODE_EASY;
 
-// Khai báo biến toàn cục cho Setting và Âm nhạc
 int g_volume = 50;
 Mix_Music* g_music = nullptr;
 
-// Hàm mới: Kiểm soát việc phát/dừng nhạc
+// phát nhạc
 void ToggleMusic(bool play) {
     if (play) {
         if (g_music == nullptr) {
-            // Tải nhạc nếu chưa tải (Đảm bảo đường dẫn "music//game_music.mp3" là đúng)
             g_music = Mix_LoadMUS("music//game_music.mp3");
             if (g_music == nullptr) {
-                // Xử lý lỗi tải nhạc ở đây
                 return;
             }
         }
 
-        // Phát nhạc nếu chưa phát. -1 là lặp vô tận.
+        // phát nhạc (-1 lặp vô tận)
         if (!Mix_PlayingMusic()) {
             Mix_PlayMusic(g_music, -1);
             UpdateMusicVolume();
@@ -34,9 +31,8 @@ void ToggleMusic(bool play) {
     }
 }
 
-// SỬA ĐỔI: Cập nhật âm lượng cho Music và TẤT CẢ SFX (bao gồm explode.wav)
 void UpdateMusicVolume() {
-    // Chuyển g_volume (0-100) sang dải 0-128 của SDL Mixer
+
     int scaledVolume = (int)((float)g_volume / 100.0f * 128.0f);
 
     if (g_music != nullptr) {

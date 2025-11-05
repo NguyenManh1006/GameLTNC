@@ -5,15 +5,18 @@
 #include <string>
 #include "PowerUp.h"
 #include <algorithm>
-#include <SDL_mixer.h> // THÊM
+#include <SDL_mixer.h>
+#include "CommonFunction.h" // Cần để dùng hằng số SPEED
+
 
 #define MAX_HP 3
 #define SHIELD_DURATION_MS 10000
 #define POWERUP_SPAWN_INTERVAL_MS 10000
 #define POWERUP_WIDTH 40
 #define POWERUP_HEIGHT 40
+#define INVINCIBLE_DURATION 1000
 
-// SỬA HÀM KHỞI TẠO
+// constructor
 Game::Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_Texture*>& enemyTexList, SDL_Texture* heartTex, SDL_Texture* shieldTex, SDL_Texture* healTex, SDL_Texture* explodeTex, Mix_Chunk* explodeSFX)
     : renderer(renderer),
       roadTexture(roadTex),
@@ -21,6 +24,8 @@ Game::Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_T
       player(nullptr),
       frameCount(0),
       backgroundY(0),
+      currentSpeed(SPEED),
+      lastSpeedIncreaseTime(SDL_GetTicks()),
       heartTexture(heartTex),
       invincible(false),
       invincibleStart(0),
@@ -34,7 +39,6 @@ Game::Game(SDL_Renderer* renderer, SDL_Texture* roadTex, const std::vector<SDL_T
       shieldStart(0),
       lastPowerUpSpawnTime(SDL_GetTicks()),
       maxHp(MAX_HP),
-      // KHỞI TẠO BIẾN VỤ NỔ
       explodeTexture(explodeTex),
       explodeSound(explodeSFX),
       isExploding(false),
@@ -66,15 +70,22 @@ void Game::SetPlayer(Player* p) {
 void Game::Update() {
     frameCount++;
 
+    // tăng tốc dộ mỗi 5s
+    if (SDL_GetTicks() - lastSpeedIncreaseTime >= 5000) {
+        currentSpeed++;
+        lastSpeedIncreaseTime = SDL_GetTicks();
+    }
+
     // spawn enemy
-    if (frameCount % 60 == 0) {
+    if (frameCount % 40 == 0) {
         int laneWidth = SCREEN_WIDTH / LANE_COUNT;
         int lane = rand() % LANE_COUNT;
 
         int texIndex = rand() % enemyTextures.size();
         SDL_Texture* tex = enemyTextures[texIndex];
 
-        int speed = 4 + rand() % 5;
+        // enemy speed
+        int speed = currentSpeed;
 
         Enemy* enemy = new Enemy(tex,
                                  lane * laneWidth + (laneWidth - ENEMY_WIDTH) / 2,
@@ -93,7 +104,7 @@ void Game::Update() {
         if (rand() % 100 < 20) {
             int laneWidth = SCREEN_WIDTH / LANE_COUNT;
             int lane = rand() % LANE_COUNT;
-            int speed = 4 + rand() % 3;
+            int speed = currentSpeed;
 
             // random powerup
             PowerUpType type = (rand() % 2 == 0) ? PowerUpType::SHIELD : PowerUpType::HEAL;
@@ -109,7 +120,7 @@ void Game::Update() {
         }
     }
 
-    // --- 3. Update và Xóa Enemy ---
+    // xóa enemy
     for (auto enemy : enemies) {
         enemy->Update();
     }
@@ -143,11 +154,12 @@ void Game::Update() {
         powerups.end()
     );
 
-    backgroundY += 5;
+    // background di chuyển
+    backgroundY += currentSpeed;
     if (backgroundY >= SCREEN_HEIGHT) backgroundY = 0;
 
     // bất tử
-    if (invincible && SDL_GetTicks() - invincibleStart > 1000) invincible = false;
+    if (invincible && SDL_GetTicks() - invincibleStart > INVINCIBLE_DURATION) invincible = false;
     if (hasShield && SDL_GetTicks() - shieldStart > SHIELD_DURATION_MS) hasShield = false;
 
     // va chạm powerup
@@ -160,7 +172,7 @@ void Game::Update() {
                 hasShield = true;
                 shieldStart = SDL_GetTicks();
             } else if (type == PowerUpType::HEAL) {
-                if (hp < maxHp) { // Chỉ hồi máu nếu chưa đầy
+                if (hp < maxHp) {
                     hp++;
                 }
             }
@@ -178,7 +190,7 @@ void Game::Update() {
         if (!invincible && SDLCommonFunction::CheckCollision(player->GetRect(), enemy->GetRect())) {
 
             if (hasShield) {
-                // Đỡ 1 đòn: Mất khiên, được bất tử ngắn
+                // mất khiên khi va chạm
                 hasShield = false;
                 invincible = true;
                 invincibleStart = SDL_GetTicks();
@@ -188,18 +200,17 @@ void Game::Update() {
                 invincible = true;
                 invincibleStart = SDL_GetTicks();
                 if (hp <= 0) {
-                    // Kích hoạt Game Over và vụ nổ CHỈ MỘT LẦN
+                    // gameover
                     if (state != GameState::GAME_OVER) {
                         SaveHighscore();
                         state = GameState::GAME_OVER;
 
-                        // KÍCH HOẠT VỤ NỔ VÀ PHÁT ÂM THANH
+                        // explode
                         isExploding = true;
-                        playerExplodeRect = player->GetRect(); // Lưu vị trí xe lúc nổ
+                        playerExplodeRect = player->GetRect();
                         explodeStartTime = SDL_GetTicks();
 
                         if (explodeSound) {
-                            // Âm lượng đã được đặt trong Menu.cpp bằng Mix_Volume(-1, ...)
                             Mix_PlayChannel(-1, explodeSound, 0);
                         }
                     }
@@ -231,10 +242,8 @@ void Game::Render() {
         powerup->Render(renderer);
     }
 
-    // vẽ player / vụ nổ <--- ĐÃ SỬA
+    // vẽ player, explode
     if (player) {
-        // KHÔNG CÓ LOGIC HẾT HẠN THỜI GIAN NỔ Ở ĐÂY
-
         if (state == GameState::PLAYING) {
             bool shouldRender = true;
             if (invincible) {
@@ -245,9 +254,8 @@ void Game::Render() {
                 player->Render(renderer);
             }
         }
-        // VẼ VỤ NỔ KHI GAME OVER VÀ isExploding CÒN TRUE
+        // vẽ explode
         else if (state == GameState::GAME_OVER) {
-             // Nếu đang nổ, vẽ hình ảnh nổ thay cho xe
              if (isExploding && explodeTexture) {
                 SDL_RenderCopy(renderer, explodeTexture, NULL, &playerExplodeRect);
              }
@@ -419,14 +427,14 @@ void Game::HandleEvent(SDL_Event e) {
         isRunning = false;
     }
 
-    // Nếu đang chơi bình thường
+    // đang chơi
     if (state == GameState::PLAYING) {
         if (player) {
-            player->HandleInput(e); // Gọi xử lý di chuyển của xe người chơi
+            player->HandleInput(e); // người chơi di chuyển
         }
     }
 
-    // Nếu ở màn hình Game Over
+    // màn hình gameover
     else if (state == GameState::GAME_OVER && e.type == SDL_MOUSEBUTTONDOWN) {
         int x = e.button.x;
         int y = e.button.y;
@@ -435,13 +443,13 @@ void Game::HandleEvent(SDL_Event e) {
         SDL_Rect menuRect = {SCREEN_WIDTH/2 - 200, SCREEN_HEIGHT/2 + 60, 120, 50};
         SDL_Rect retryRect = {SCREEN_WIDTH/2 + 80, SCREEN_HEIGHT/2 + 60, 120, 50};
 
-        // Click vào MENU → quay lại menu chính
+        // bấm vào menu
         if (x >= menuRect.x && x <= menuRect.x + menuRect.w &&
             y >= menuRect.y && y <= menuRect.y + menuRect.h) {
             isRunning = false;
         }
 
-        // Click vào RETRY → chơi lại
+        // bấm retry
         if (x >= retryRect.x && x <= retryRect.x + retryRect.w &&
             y >= retryRect.y && y <= retryRect.y + retryRect.h) {
             ResetGame();
@@ -472,24 +480,28 @@ void Game::ResetGame() {
     shieldStart = 0;
     lastPowerUpSpawnTime = SDL_GetTicks();
 
-    // Reset Explosion State <--- SỬA
-    isExploding = false; // Vụ nổ sẽ biến mất khi gọi hàm này
+    // Reset explode
+    isExploding = false;
     explodeStartTime = 0;
+
+    // Reset speed
+    currentSpeed = SPEED;
+    lastSpeedIncreaseTime = SDL_GetTicks();
 
     score = 0;
     lastScoreTime = SDL_GetTicks();
 
-    // Reset HP
+    // Reset máu
     if (g_gameMode == MODE_EASY) hp = maxHp;
     else if (g_gameMode == MODE_MEDIUM) hp = 2;
     else hp = 1;
 
-    // Đặt lại vị trí player
+    // vẽ lại player
     if (player) {
         SDL_Rect rect = player->GetRect();
         player->SetRect(SCREEN_WIDTH / 2 - rect.w / 2,
                         SCREEN_HEIGHT - rect.h - 20);
     }
 
-    state = GameState::PLAYING; // quay lại trạng thái đang chơi
+    state = GameState::PLAYING;
 }

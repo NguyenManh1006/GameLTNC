@@ -31,7 +31,7 @@ const int PLAYER_WIDTH = 60;
 const int PLAYER_HEIGHT = 90;
 const int ENEMY_WIDTH = 60;
 const int ENEMY_HEIGHT = 90;
-const int SPEED = 5;
+const int SPEED = 6;
 
 const int COLOR_KEY_R = 167;
 const int COLOR_KEY_G = 175;

@@ -26,7 +26,6 @@ int main(int argc, char* argv[]) {
 
     bool running = true;
     while (running) {
-        // Nhạc nền phải TẮT khi ở Menu chính
         MenuOption choice = ShowMenu(renderer);
         if (choice == MENU_QUIT) break;
 
@@ -41,9 +40,9 @@ int main(int argc, char* argv[]) {
             SDL_Texture* shieldTex = LoadTexture("image//shield.png", renderer);
             SDL_Texture* healTex   = LoadTexture("image//heal.png", renderer);
             SDL_Texture* explodeTex = LoadTexture("image//explode.png", renderer);
-            Mix_Chunk* explodeSound = Mix_LoadWAV("music//explode.wav");
+            Mix_Chunk* explodeSFX = Mix_LoadWAV("music//explode.wav");
 
-            if (!roadTex || !playerTex || !enemyTex1 || !enemyTex2 || !enemyTex3 || !heartTex || !shieldTex || !healTex || !explodeTex || !explodeSound)
+            if (!roadTex || !playerTex || !enemyTex1 || !enemyTex2 || !enemyTex3 || !heartTex || !shieldTex || !healTex || !explodeTex || !explodeSFX)
                 break;
 
             std::vector<SDL_Texture*> enemyTextures = { enemyTex1, enemyTex2, enemyTex3 };
@@ -54,7 +53,7 @@ int main(int argc, char* argv[]) {
                 shouldRestart = false;
                 PauseMenu loopResult = RESULT_QUIT_TO_MENU;
 
-                Game game(renderer, roadTex, enemyTextures, heartTex, shieldTex, healTex, explodeTex, explodeSound);
+                Game game(renderer, roadTex, enemyTextures, heartTex, shieldTex, healTex, explodeTex, explodeSFX);
                 Player* player = new Player(playerTex, SCREEN_WIDTH / 2 - 20,
                                             SCREEN_HEIGHT - 100, PLAYER_WIDTH, PLAYER_HEIGHT);
                 game.SetPlayer(player);
@@ -62,7 +61,7 @@ int main(int argc, char* argv[]) {
                 bool inGame = true;
                 SDL_Event e;
 
-                // BẬT NHẠC KHI BẮT ĐẦU CHƠI GAME
+                // bật nhạc nền
                 ToggleMusic(true);
 
                 // chơi game
@@ -74,7 +73,7 @@ int main(int argc, char* argv[]) {
                         if (e.type == SDL_QUIT) { inGame = false; running = false; loopResult = RESULT_EXIT_GAME; }
                         else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
                             // pause game
-                            ToggleMusic(false); // tắt nhạc khi pause
+                            ToggleMusic(false); // tắt nhạc
                             loopResult = ShowPauseMenu(renderer);
 
                             if (loopResult == RESULT_CONTINUE_GAME) {
@@ -124,7 +123,7 @@ int main(int argc, char* argv[]) {
                     if (frameTime < 16) SDL_Delay(16 - frameTime);
                 }
 
-                // Đảm bảo nhạc TẮT khi thoát khỏi vòng lặp game
+                // tắt nhạc
                 ToggleMusic(false);
 
                 if (loopResult == RESULT_RESTART_GAME) {
@@ -148,7 +147,7 @@ int main(int argc, char* argv[]) {
             SDL_DestroyTexture(shieldTex);
             SDL_DestroyTexture(healTex);
             SDL_DestroyTexture(explodeTex);
-            Mix_FreeChunk(explodeSound);
+            if (explodeSFX) Mix_FreeChunk(explodeSFX);
         }
 
         else if (choice == MENU_MODE) {
@@ -156,11 +155,11 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Dọn dẹp cuối cùng
+    // clear
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
-    // Giải phóng tài nguyên nhạc
+    // clear nhạc
     if (g_music) Mix_FreeMusic(g_music);
     Mix_CloseAudio();
 

@@ -7,7 +7,7 @@
 #include "enemy.h"
 #include "commonfunction.h"
 #include "PowerUp.h"
-#include <SDL_mixer.h> // THÊM: Để sử dụng Mix_Chunk
+#include <SDL_mixer.h>
 
 enum class GameState {
     PLAYING,
@@ -27,7 +27,7 @@ public:
         const std::vector<SDL_Texture*>& enemyTexList,
         SDL_Texture* heartTex, SDL_Texture* shieldTex,
         SDL_Texture* healTex,
-        SDL_Texture* explodeTex, Mix_Chunk* explodeSFX); // <--- ĐÃ SỬA
+        SDL_Texture* explodeTex, Mix_Chunk* explodeSFX);
 
     ~Game();
 
@@ -56,6 +56,10 @@ private:
     int frameCount;
     int backgroundY;
 
+    // BIẾN MỚI CHO TÍNH NĂNG TĂNG TỐC <--- THÊM
+    int currentSpeed;
+    Uint32 lastSpeedIncreaseTime;
+
     int hp;
     int maxHp;
     bool invincible;
@@ -83,7 +87,7 @@ private:
     Mix_Chunk* explodeSound;
     bool isExploding;
     SDL_Rect playerExplodeRect; // Lưu vị trí nổ
-    Uint32 explodeStartTime; // Dùng để lưu thời điểm nổ (chứ không dùng để hẹn giờ)
+    Uint32 explodeStartTime;
 };
 
 #endif // GAMEMAP_H_INCLUDED
