@@ -34,11 +34,17 @@ void ToggleMusic(bool play) {
     }
 }
 
-// Hàm mới: Cập nhật âm lượng cho SDL_mixer
+// SỬA ĐỔI: Cập nhật âm lượng cho Music và TẤT CẢ SFX (bao gồm explode.wav)
 void UpdateMusicVolume() {
+    // Chuyển g_volume (0-100) sang dải 0-128 của SDL Mixer
+    int scaledVolume = (int)((float)g_volume / 100.0f * 128.0f);
+
     if (g_music != nullptr) {
-        Mix_VolumeMusic(g_volume);
+        Mix_VolumeMusic(scaledVolume); // Cập nhật âm lượng nhạc nền
     }
+
+    // Cập nhật âm lượng SFX chung (-1 áp dụng cho tất cả kênh)
+    Mix_Volume(-1, scaledVolume);
 }
 
 

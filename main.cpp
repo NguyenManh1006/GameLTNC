@@ -12,7 +12,6 @@
 #include "Menu.h"
 #include "PowerUp.h"
 
-// Biến toàn cục g_music được khai báo extern trong Menu.h
 extern Mix_Music* g_music;
 
 int main(int argc, char* argv[]) {
@@ -41,8 +40,10 @@ int main(int argc, char* argv[]) {
             SDL_Texture* heartTex  = LoadTexture("image//heart.png", renderer);
             SDL_Texture* shieldTex = LoadTexture("image//shield.png", renderer);
             SDL_Texture* healTex   = LoadTexture("image//heal.png", renderer);
+            SDL_Texture* explodeTex = LoadTexture("image//explode.png", renderer);
+            Mix_Chunk* explodeSound = Mix_LoadWAV("music//explode.wav");
 
-            if (!roadTex || !playerTex || !enemyTex1 || !enemyTex2 || !enemyTex3 || !heartTex || !shieldTex || !healTex)
+            if (!roadTex || !playerTex || !enemyTex1 || !enemyTex2 || !enemyTex3 || !heartTex || !shieldTex || !healTex || !explodeTex || !explodeSound)
                 break;
 
             std::vector<SDL_Texture*> enemyTextures = { enemyTex1, enemyTex2, enemyTex3 };
@@ -53,7 +54,7 @@ int main(int argc, char* argv[]) {
                 shouldRestart = false;
                 PauseMenu loopResult = RESULT_QUIT_TO_MENU;
 
-                Game game(renderer, roadTex, enemyTextures, heartTex, shieldTex, healTex);
+                Game game(renderer, roadTex, enemyTextures, heartTex, shieldTex, healTex, explodeTex, explodeSound);
                 Player* player = new Player(playerTex, SCREEN_WIDTH / 2 - 20,
                                             SCREEN_HEIGHT - 100, PLAYER_WIDTH, PLAYER_HEIGHT);
                 game.SetPlayer(player);
@@ -146,6 +147,8 @@ int main(int argc, char* argv[]) {
             SDL_DestroyTexture(heartTex);
             SDL_DestroyTexture(shieldTex);
             SDL_DestroyTexture(healTex);
+            SDL_DestroyTexture(explodeTex);
+            Mix_FreeChunk(explodeSound);
         }
 
         else if (choice == MENU_MODE) {

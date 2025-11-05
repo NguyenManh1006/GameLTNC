@@ -7,6 +7,7 @@
 #include "enemy.h"
 #include "commonfunction.h"
 #include "PowerUp.h"
+#include <SDL_mixer.h> // THÊM: Để sử dụng Mix_Chunk
 
 enum class GameState {
     PLAYING,
@@ -21,10 +22,12 @@ enum class GameOverOption {
 
 class Game {
 public:
+    // SỬA HÀM KHỞI TẠO: Thêm tham số cho Texture và Sound của vụ nổ
     Game(SDL_Renderer* renderer, SDL_Texture* roadTex,
         const std::vector<SDL_Texture*>& enemyTexList,
         SDL_Texture* heartTex, SDL_Texture* shieldTex,
-        SDL_Texture* healTex);
+        SDL_Texture* healTex,
+        SDL_Texture* explodeTex, Mix_Chunk* explodeSFX); // <--- ĐÃ SỬA
 
     ~Game();
 
@@ -74,6 +77,13 @@ private:
 
     GameState state;
     void RenderGameOver();
+
+    // CÁC BIẾN MỚI CHO HIỆU ỨNG VỤ NỔ <--- THÊM
+    SDL_Texture* explodeTexture;
+    Mix_Chunk* explodeSound;
+    bool isExploding;
+    SDL_Rect playerExplodeRect; // Lưu vị trí nổ
+    Uint32 explodeStartTime; // Dùng để lưu thời điểm nổ (chứ không dùng để hẹn giờ)
 };
 
 #endif // GAMEMAP_H_INCLUDED
