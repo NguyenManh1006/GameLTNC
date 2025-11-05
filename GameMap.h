@@ -82,11 +82,10 @@ private:
     GameState state;
     void RenderGameOver();
 
-    // CÁC BIẾN MỚI CHO HIỆU ỨNG VỤ NỔ <--- THÊM
     SDL_Texture* explodeTexture;
     Mix_Chunk* explodeSound;
     bool isExploding;
-    SDL_Rect playerExplodeRect; // Lưu vị trí nổ
+    SDL_Rect playerExplodeRect;
     Uint32 explodeStartTime;
 };
 

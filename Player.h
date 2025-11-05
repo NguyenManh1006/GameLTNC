@@ -8,6 +8,8 @@ public:
     Player(SDL_Texture* tex, int x, int y, int w, int h);
     void MoveLeft(int laneWidth);
     void MoveRight(int laneWidth);
+    void MoveUp(int screenHeight, int speed);
+    void MoveDown(int screenHeight, int speed);
     int GetLane() const;
 
     void HandleInput(const SDL_Event& e);

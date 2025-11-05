@@ -33,24 +33,23 @@ void ToggleMusic(bool play) {
 
 void UpdateMusicVolume() {
 
+    // âm lượng
     int scaledVolume = (int)((float)g_volume / 100.0f * 128.0f);
 
     if (g_music != nullptr) {
         Mix_VolumeMusic(scaledVolume); // Cập nhật âm lượng nhạc nền
     }
 
-    // Cập nhật âm lượng SFX chung (-1 áp dụng cho tất cả kênh)
     Mix_Volume(-1, scaledVolume);
 }
 
-
+// highscore
 std::vector<int> LoadHighScores() {
     std::vector<int> scores = {0, 0, 0};
     std::ifstream file("highscore.txt");
 
     if (file.is_open()) {
         int score_easy, score_medium, score_hard;
-        // Giả định thứ tự là Easy, Medium, Hard
         if (file >> score_easy && file >> score_medium && file >> score_hard) {
             scores[0] = score_easy;
             scores[1] = score_medium;
@@ -62,10 +61,10 @@ std::vector<int> LoadHighScores() {
 }
 
 void ShowHighScores(SDL_Renderer* renderer) {
-    // 1. Tải Background
+    // background
     SDL_Texture* backgroundTex = LoadTexture("image//pause.png", renderer);
 
-    // 2. Setup Font và Màu
+    // màu, cỡ chữ
     TTF_Font* fontTitle = TTF_OpenFont("font//dlxfont_.ttf", 24);
     TTF_Font* fontScore = TTF_OpenFont("font//dlxfont_.ttf", 24);
     TTF_Font* fontButton = TTF_OpenFont("font//dlxfont_.ttf", 24);
@@ -80,17 +79,17 @@ void ShowHighScores(SDL_Renderer* renderer) {
     SDL_Color darkWhite = {200, 200, 200, 255};
     SDL_Color black = {0, 0, 0, 255};
 
-    // 3. Load Scores
+    // load
     std::vector<int> scores = LoadHighScores();
     std::string modes[3] = {"EASY", "MEDIUM", "HARD"};
 
-    // 4. Tạo Title Texture
+    // title
     SDL_Surface* titleSurface = TTF_RenderText_Solid(fontTitle, "HIGH SCORES", red);
     SDL_Texture* titleTex = SDL_CreateTextureFromSurface(renderer, titleSurface);
     SDL_Rect titleRect = { (SCREEN_WIDTH - titleSurface->w) / 2, 200, titleSurface->w, titleSurface->h };
     SDL_FreeSurface(titleSurface);
 
-    // 5. Tạo Score Textures
+    // score texture
     SDL_Texture* scoreTex[3];
     SDL_Rect scoreRect[3];
     int startY = titleRect.y + titleRect.h + 30;
@@ -107,7 +106,7 @@ void ShowHighScores(SDL_Renderer* renderer) {
         SDL_FreeSurface(s);
     }
 
-    // 6. Tạo nút BACK
+    // nút back
     std::string backLabel = "BACK";
     SDL_Surface* backS = TTF_RenderText_Solid(fontButton, backLabel.c_str(), white);
     SDL_Surface* backHoverS = TTF_RenderText_Solid(fontButton, backLabel.c_str(), darkWhite);
@@ -121,9 +120,9 @@ void ShowHighScores(SDL_Renderer* renderer) {
     SDL_FreeSurface(backS);
     SDL_FreeSurface(backHoverS);
 
-    // 7. Vòng lặp chính
+    // vòng lặp chính
     bool running = true;
-    int hovered = 0; // 0: none, 1: back
+    int hovered = 0;
     SDL_Event e;
     while (running) {
         while (SDL_PollEvent(&e)) {
@@ -166,7 +165,7 @@ void ShowHighScores(SDL_Renderer* renderer) {
         SDL_Delay(16);
     }
 
-    // 8. Dọn dẹp
+    // clear
     SDL_DestroyTexture(titleTex);
     for (int i = 0; i < 3; i++) {
         SDL_DestroyTexture(scoreTex[i]);
@@ -180,10 +179,10 @@ void ShowHighScores(SDL_Renderer* renderer) {
 }
 
 void ShowSettingMenu(SDL_Renderer* renderer) {
-    // 1. Tải Background
+    // background
     SDL_Texture* backgroundTex = LoadTexture("image//pause.png", renderer);
 
-    // 2. Setup Font và Màu
+    // font, màu
     TTF_Font* fontTitle = TTF_OpenFont("font//dlxfont_.ttf", 30);
     TTF_Font* fontLabel = TTF_OpenFont("font//dlxfont_.ttf", 25);
     TTF_Font* fontButton = TTF_OpenFont("font//dlxfont_.ttf", 25);
@@ -198,17 +197,16 @@ void ShowSettingMenu(SDL_Renderer* renderer) {
     SDL_Color darkWhite = {200, 200, 200, 255};
     SDL_Color black = {0, 0, 0, 255};
 
-    // 3. Tạo Title Texture
+    // title
     SDL_Surface* titleSurface = TTF_RenderText_Solid(fontTitle, "SETTINGS", red);
     SDL_Texture* titleTex = SDL_CreateTextureFromSurface(renderer, titleSurface);
     SDL_Rect titleRect = { (SCREEN_WIDTH - titleSurface->w) / 2, 200, titleSurface->w, titleSurface->h };
     SDL_FreeSurface(titleSurface);
 
-    // 4. Tạo các nút điều chỉnh âm lượng và nút BACK
-    // Khung nút + và - (40x40)
+    // nút âm lượng
     SDL_Rect minusRect = { SCREEN_WIDTH / 2 - 80, 300, 40, 40 };
     SDL_Rect plusRect = { SCREEN_WIDTH / 2 + 40, 300, 40, 40 };
-    SDL_Rect valueRect = { SCREEN_WIDTH / 2 - 30, 300, 60, 40 }; // Hiển thị giá trị
+    SDL_Rect valueRect = { SCREEN_WIDTH / 2 - 30, 300, 60, 40 };
 
     // Nút BACK
     std::string backLabel = "BACK";
@@ -227,7 +225,7 @@ void ShowSettingMenu(SDL_Renderer* renderer) {
     SDL_Texture *minusTex = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(fontLabel, "-", white));
     SDL_Texture *plusTex = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(fontLabel, "+", white));
 
-    // 5. Vòng lặp chính
+    // Vòng lặp chính
     bool running = true;
     int hovered = 0; // 1: minus, 2: plus, 3: back
     SDL_Event e;
@@ -261,7 +259,6 @@ void ShowSettingMenu(SDL_Renderer* renderer) {
             }
         }
 
-        // 6. Vẽ
         // Vẽ Background
         if (backgroundTex) {
             SDL_RenderCopy(renderer, backgroundTex, NULL, NULL);
@@ -280,7 +277,7 @@ void ShowSettingMenu(SDL_Renderer* renderer) {
         SDL_FreeSurface(volumeLabelS);
         SDL_DestroyTexture(volumeLabelTex);
 
-        // Hiển thị giá trị âm lượng (tính theo %)
+        // hiển thị âm lượng
         float percent = (float)g_volume / 100.0f * 100.0f;
         std::stringstream ss;
         ss << std::fixed << std::setprecision(0) << percent << "%";
@@ -291,44 +288,44 @@ void ShowSettingMenu(SDL_Renderer* renderer) {
         SDL_FreeSurface(volumeValueS);
         SDL_DestroyTexture(volumeValueTex);
 
-        // --- Nút GIẢM (-) ---
+        //nút giảm
         SDL_SetRenderDrawColor(renderer, (hovered == 1 ? darkWhite.r : white.r), (hovered == 1 ? darkWhite.g : white.g), (hovered == 1 ? darkWhite.b : white.b), 255);
-        SDL_RenderDrawRect(renderer, &minusRect); // Vẽ khung
+        SDL_RenderDrawRect(renderer, &minusRect); // Vẽ khung nút
 
-        // Lấy kích thước thật của ký tự '-' để căn giữa
+        // căn giữa
         int minusW, minusH;
         SDL_QueryTexture(minusTex, NULL, NULL, &minusW, &minusH);
         SDL_Rect minusTextRect = {
-            minusRect.x + (minusRect.w - minusW) / 2, // Căn giữa theo X
-            minusRect.y + (minusRect.h - minusH) / 2, // Căn giữa theo Y
+            minusRect.x + (minusRect.w - minusW) / 2, // Căn giữa
+            minusRect.y + (minusRect.h - minusH) / 2,
             minusW,
             minusH
         };
-        SDL_RenderCopy(renderer, minusTex, NULL, &minusTextRect); // Vẽ ký tự đã căn giữa
+        SDL_RenderCopy(renderer, minusTex, NULL, &minusTextRect); // Vẽ ký tự
 
-        // --- Nút TĂNG (+) ---
+        // -nút tăng
         SDL_SetRenderDrawColor(renderer, (hovered == 2 ? darkWhite.r : white.r), (hovered == 2 ? darkWhite.g : white.g), (hovered == 2 ? darkWhite.b : white.b), 255);
         SDL_RenderDrawRect(renderer, &plusRect); // Vẽ khung
 
-        // Lấy kích thước thật của ký tự '+' để căn giữa
+        // căn giữa
         int plusW, plusH;
         SDL_QueryTexture(plusTex, NULL, NULL, &plusW, &plusH);
         SDL_Rect plusTextRect = {
-            plusRect.x + (plusRect.w - plusW) / 2, // Căn giữa theo X
-            plusRect.y + (plusRect.h - plusH) / 2, // Căn giữa theo Y
+            plusRect.x + (plusRect.w - plusW) / 2,
+            plusRect.y + (plusRect.h - plusH) / 2,
             plusW,
             plusH
         };
-        SDL_RenderCopy(renderer, plusTex, NULL, &plusTextRect); // Vẽ ký tự đã căn giữa
+        SDL_RenderCopy(renderer, plusTex, NULL, &plusTextRect); // Vẽ ký tự
 
-        // Vẽ nút BACK
+        // Vẽ nút back
         SDL_RenderCopy(renderer, (hovered == 3 ? backHoverTex : backTex), NULL, &backRect);
 
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }
 
-    // 7. Dọn dẹp
+    //clear
     if (backgroundTex) SDL_DestroyTexture(backgroundTex);
     SDL_DestroyTexture(titleTex);
     SDL_DestroyTexture(minusTex);
@@ -341,11 +338,10 @@ void ShowSettingMenu(SDL_Renderer* renderer) {
 }
 
 void ShowModeMenu(SDL_Renderer* renderer) {
-    // 1. Tải Background
+    //background
     SDL_Texture* backgroundTex = LoadTexture("image//pause.png", renderer);
     SDL_Color black = {0, 0, 0, 255};
 
-    // 2. Setup Menu Options
     bool selecting = true;
     SDL_Event e;
     TTF_Font* font = TTF_OpenFont("font//dlxfont_.ttf", 32);
@@ -375,7 +371,7 @@ void ShowModeMenu(SDL_Renderer* renderer) {
         SDL_FreeSurface(s2);
     }
 
-    // 3. Vòng lặp chính
+    // vòng lặp
     int hovered = -1;
     while (selecting) {
         while (SDL_PollEvent(&e)) {
@@ -410,7 +406,7 @@ void ShowModeMenu(SDL_Renderer* renderer) {
         SDL_Delay(16);
     }
 
-    // 4. Dọn dẹp
+    // clear
     if (backgroundTex) SDL_DestroyTexture(backgroundTex);
     for (int i = 0; i < 3; i++) {
         SDL_DestroyTexture(tex[i]);
@@ -481,7 +477,7 @@ MenuOption ShowMenu(SDL_Renderer* renderer) {
                 if (hovered != -1) {
                     switch (hovered) {
                         case 0: result = MENU_PLAY; running = false; break;
-                        case 1: result = MENU_MODE; running = false; break; // Trả về MENU_MODE để main.cpp gọi ShowModeMenu
+                        case 1: result = MENU_MODE; running = false; break;
                         case 2: // Nút SCORE
                             ShowHighScores(renderer);
                             break;

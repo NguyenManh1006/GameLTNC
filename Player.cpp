@@ -19,6 +19,16 @@ void Player::MoveRight(int laneWidth) {
     }
 }
 
+void Player::MoveUp(int screenHeight, int speed) {
+    rect.y -= speed;
+    if (rect.y < 0) rect.y = 0; // giới hạn trên
+}
+
+void Player::MoveDown(int screenHeight, int speed) {
+    rect.y += speed;
+    if (rect.y + rect.h > screenHeight) rect.y = screenHeight - rect.h; // Giới hạn dưới
+}
+
 void Player::HandleInput(const SDL_Event& e) {
     if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
@@ -33,6 +43,19 @@ void Player::HandleInput(const SDL_Event& e) {
             break;
         case SDLK_d:
             MoveRight(SCREEN_WIDTH / LANE_COUNT);
+            break;
+        }
+    }
+
+    if (e.type == SDL_KEYDOWN) {
+        switch (e.key.keysym.sym) {
+        case SDLK_UP:
+        case SDLK_w:
+            MoveUp(SCREEN_HEIGHT, 15);
+            break;
+        case SDLK_DOWN:
+        case SDLK_s:
+            MoveDown(SCREEN_HEIGHT, 15);
             break;
         }
     }
